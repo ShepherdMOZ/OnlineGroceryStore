@@ -57,9 +57,14 @@ namespace OnlineGroceryStore.Helpers
         {
             if ( GetCurrentBreakDownSums(currentBreakdown).Item1 >= orderQuantity)
             {
+                // Exit: check if this configure is the best one -> ComparePackingConfiguration()
 
                 return;
             }
+
+            // 1. Iterating through all packs
+            // 2. Choose one of packs, select the maximum quantity of packs for given condition
+
 
         }
 
