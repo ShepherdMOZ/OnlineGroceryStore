@@ -61,12 +61,29 @@ namespace OnlineGroceryStore.Helpers
                 return;
             }
 
+            // 1. Iterating through each package, find one as choice
+            for (var i = 0; i<packConfig.Count(); i++)
+            {
+                // use the maximum amount of the pack
+                int packItemNum = packConfig[i].Item2;
+                int packCount = orderQuantity / packItemNum;
+                int remain_pack = orderQuantity % packItemNum;
+
+                // If selectable, this is added to the 
+                if (! (packCount > 0))
+                {
+                    
+                }
+                
+            }
+
         }
 
         private static Tuple<int,double> GetCurrentBreakDownSums(List<Tuple<int, double>> currentBreakdown)
         {
             int quantity = 0;
             double price = 0.0;
+            // 1: ge
             foreach (var breakdown in currentBreakdown)
             {
                 quantity += breakdown.Item1;

@@ -7,7 +7,7 @@ namespace OnlineGroceryStore.ViewModels
 {
     public class CommandPromptInputViewModel
     {
-        public int quantity { get;set }
+        public int quantity { get; set; }
         public string code { get; set; }
 
     }
