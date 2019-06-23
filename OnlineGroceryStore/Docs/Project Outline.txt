@@ -1,0 +1,5 @@
+﻿Assumption:
+1. When mulitple combination of packing is avaliable, the system should provide the combination with lowest price in total.
+2. A stock level is assumed. 
+	- When placing the order, the stock level must be checked to satisfied the configuration of packing. If the stock level cannot fulfilled the order, the most expensive package will be rounded down first.
+3. Defined by the question, it is assumed that packages are not divideable. If the total order amount cannot be all divided into certain packages, the system will round the order up with minimum extra cost.
