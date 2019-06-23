@@ -76,7 +76,7 @@ namespace OnlineGroceryStore.Models
                         new InventoryPackingConfigure
                         {
                             inventory = item_yt2,
-                            packSize = 16,
+                            packSize = 15,
                             packPrice = 13.95
                         });
 

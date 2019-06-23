@@ -338,3 +338,7 @@ ASALocalRun/
 
 # BeatPulse healthcheck temp database
 healthchecksdb
+.DS_Store
+OnlineGroceryStore/.vscode/launch.json
+OnlineGroceryStore/.vscode/tasks.json
+OnlineGroceryStore/Properties/launchSettings.json

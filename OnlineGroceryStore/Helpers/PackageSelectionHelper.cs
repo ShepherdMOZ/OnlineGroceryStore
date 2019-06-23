@@ -26,7 +26,7 @@ namespace OnlineGroceryStore.Helpers
         public static ICollection<PackBreakdownViewModel> GetPackBreakdown(string itemID, int orderQuantity, OnlineGroceryStoreContext _context)
         {
 
-            List<PackBreakdownViewModel> breakDowns = null;
+            List<PackBreakdownViewModel> bestBreakDowns = new List<PackBreakdownViewModel> ();
 
             if (itemID.Length <=0 || orderQuantity <= 0)
             {
@@ -35,50 +35,91 @@ namespace OnlineGroceryStore.Helpers
 
             var packages = _context.InventoryPackingConfigure
                 .Where(x => x.itemID == itemID)
-                .Select(x => new Tuple<int, int, double> (x.packingID, x.packSize, x.packPrice))
                 .ToList();
 
-            if (!(packages.Count() > 0))
+            if (!(packages.Count > 0))
             {
                 return null;
             }
 
-            PackingBreakdownRunner(packages, orderQuantity, ref breakDowns);
-           
+            PackingBreakdownRunner(packages, orderQuantity, new List<InventoryPackingConfigure> (), new List<PackBreakdownViewModel>(), ref bestBreakDowns);
 
-            return breakDowns;
-
-
+            return bestBreakDowns;
         }
 
         // Algorithm recursion runner
-        private static void PackingBreakdownRunner(List<Tuple<int, int, double>> packConfig, int orderQuantity, 
-            ref List<PackBreakdownViewModel> breakDowns, List<Tuple<int, double>> currentBreakdown = null)
+        private static void PackingBreakdownRunner(List<InventoryPackingConfigure> packConfig, int orderQuantity, List<InventoryPackingConfigure> usedConfig, 
+             List<PackBreakdownViewModel> breakDowns, ref List<PackBreakdownViewModel> bestBreakDowns)
         {
-            if ( GetCurrentBreakDownSums(currentBreakdown).Item1 >= orderQuantity)
+            // Exit - 1: find a combination that can fulfilled all the [orderQuality]
+            if (orderQuantity <= 0)
             {
-                // Exit: check if this configure is the best one -> ComparePackingConfiguration()
-
+                // check if this configure is the best one 
+                ComparePackingConfiguration(ref bestBreakDowns, breakDowns);
                 return;
             }
 
+
             // 1. Iterating through all packs
             // 2. Choose one of packs, select the maximum quantity of packs for given condition
+            for (var i = 0; i<packConfig.Count; i++)
+            {
+                if (usedConfig.Contains(packConfig[i])){
+                    continue;
+                }
+                // use the maximum amount of the pack
+                int packItemNum = packConfig[i].packSize;
+                int packCount = orderQuantity / packItemNum;
+                double packCost = packConfig[i].packPrice * packCount;
+                int remainQuantity = orderQuantity % packItemNum;
 
-
+                // If selectable, this is added to the current selection
+                if ( packCount > 0)
+                {
+                    var newPack = new PackBreakdownViewModel{
+                        packQuantity = packCount,
+                        packingID = packConfig[i].packingID,
+                        inventoryPackingConfigure = packConfig[i],
+                        
+                    };
+                    var used_config = packConfig[i];
+                    breakDowns.Add(newPack);
+                    usedConfig.Add(packConfig[i]);
+                    PackingBreakdownRunner(packConfig, remainQuantity,usedConfig, breakDowns, ref bestBreakDowns);
+                    usedConfig.Remove(packConfig[i]);
+                    breakDowns.RemoveAt(breakDowns.Count - 1);
+                }
+            }
         }
 
-        private static Tuple<int,double> GetCurrentBreakDownSums(List<Tuple<int, double>> currentBreakdown)
+        private static void ComparePackingConfiguration(ref List<PackBreakdownViewModel> bestBreakDowns,
+            List<PackBreakdownViewModel> newBreakDowns)
+        {   
+            // Replace if new breakdowns covered more item
+            if (GetBreakDownSums(newBreakDowns).Item1 > GetBreakDownSums(bestBreakDowns).Item1)
+            {
+                bestBreakDowns = newBreakDowns.ToList();
+            }
+            // Replace breakdown if cost if cheaper or current best in null
+            else if ( GetBreakDownSums(newBreakDowns).Item2 > 0 && GetBreakDownSums(newBreakDowns).Item2 < GetBreakDownSums(bestBreakDowns).Item2 || bestBreakDowns == null)
+            {
+                bestBreakDowns = newBreakDowns.ToList();
+            } 
+
+            
+        }
+
+        public static Tuple<int,double> GetBreakDownSums(ICollection<PackBreakdownViewModel> currentBreakdown)
         {
             int quantity = 0;
-            double price = 0.0;
+            double cost = 0.0;
             foreach (var breakdown in currentBreakdown)
             {
-                quantity += breakdown.Item1;
-                price = breakdown.Item1 * breakdown.Item2;
+                quantity += breakdown.packQuantity * breakdown.inventoryPackingConfigure.packSize;
+                cost += breakdown.inventoryPackingConfigure.packPrice * breakdown.packQuantity;
             }
 
-            return new Tuple<int, double> (quantity, price) ;
+            return new Tuple<int, double> (quantity, cost);
         }
 
     }
