@@ -45,7 +45,7 @@ namespace OnlineGroceryStore.Helpers
              List<PackBreakdownViewModel> breakDowns, ref List<PackBreakdownViewModel> bestBreakDowns)
         {
             // Exit - 1: find a combination that can fulfilled all the [orderQuality]
-            if (orderQuantity <= 0)
+            if (orderQuantity <= 0 || PackVolumeOvershoot(orderQuantity,packConfig))
             {
                 // check if this configure is the best one 
                 ComparePackingConfiguration(ref bestBreakDowns, breakDowns);
@@ -84,6 +84,21 @@ namespace OnlineGroceryStore.Helpers
                     breakDowns.RemoveAt(breakDowns.Count - 1);
                 }
             }
+        }
+
+        private static bool PackVolumeOvershoot(int orderQuantity, List<InventoryPackingConfigure> packConfig)
+        {
+            bool overshoot = true;
+
+            foreach (var config in packConfig)
+            {
+                if (orderQuantity >= config.packSize)
+                {
+                    return false;
+                }
+            }
+
+            return overshoot;
         }
 
         private static void ComparePackingConfiguration(ref List<PackBreakdownViewModel> bestBreakDowns,

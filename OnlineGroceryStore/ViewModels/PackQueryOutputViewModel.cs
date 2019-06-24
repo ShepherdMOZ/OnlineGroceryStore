@@ -8,6 +8,7 @@ namespace OnlineGroceryStore.ViewModels
 {
     public class PackQueryOutputViewModel
     {
+        public int totalQuantity { get; set; }
         public double totalPrice { get; set; }
         public ICollection<PackBreakdownViewModel> packBreakdowns { get; set; }
     }

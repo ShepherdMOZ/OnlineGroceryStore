@@ -5,11 +5,8 @@
     ViewData["Title"] = "Place Order Page";
 }
 
-<h1>PlaceOrderDemo</h1>
+<h1>Place Order Demo</h1>
 
-<p>
-    <a asp-page="Create">Create New</a>
-</p>
 <table class="table">
     <thead>
         <tr>
@@ -42,8 +39,8 @@
                 </td>
                 <td rowspan="@item.packs.Count">
                     <input class="totalQuantityInput" id="@item.itemCode" type="number" placeholder="input quantity and hit enter" />
-
-                    <span><br> </span>
+                    <br>
+                    <p style="max-width:150px;" id="overshoot-@item.itemCode"> </p>
                 </td>
                 @{
                     int i = 0;
@@ -54,10 +51,10 @@
                         {
                         @: </tr><tr>
                         }
-                        <td id="pack-size-@pack.packingID" related="@pack.inventory.itemCode">
+                        <td id="size-pack-@pack.packingID" related="@pack.inventory.itemCode">
                             @Html.DisplayFor(modelItem => pack.packSize) per pack
                         </td>
-                        <td id="pack-price-@pack.packingID" related="@pack.inventory.itemCode">
+                        <td id="price-pack-@pack.packingID" related="@pack.inventory.itemCode">
                             $ @Html.DisplayFor(modelItem => pack.packPrice)
                         </td>
                         <td>
@@ -66,6 +63,7 @@
                         i++;
                     }
                 }
+                <td id="price-@item.itemCode"></td>
             </tr>
         }
     </tbody>
@@ -77,47 +75,61 @@
     let totalQuantityInputs = document.querySelectorAll('.totalQuantityInput'),
         packBreakdownInputs = document.querySelectorAll('.packBreakdownInput')
 
+    function postData(quantity, code) {
+        axios.post('/api/orders/getpacks', {
+            quantity: quantity,
+            code: code
+        }).then((res) => {
+            document.querySelectorAll('.packBreakdownInput.item-' + code).forEach((element) => {
+                console.log(element);
+                element.value = 0
+                console.log(element.value);
+            });
+            APIOnUpdate = true;
+            console.log(res);
+            res.data.packBreakdowns.forEach((breakdown) => {
+                var input_source = document.querySelector('#pack-' + breakdown.packingID.toString() + '.packBreakdownInput');
+                input_source.value = breakdown.packQuantity
+            });
+            document.querySelector('#price-' + code).innerHTML = '$ ' + res.data.totalPrice;
+            if (res.data.totalQuantity < quantity) {
+                document.querySelector('#overshoot-' + code).innerHTML = "Current pack can only provide " + res.data.totalQuantity + " items in total, please add packages manually on demand"
+            } else {
+                document.querySelector('#overshoot-' + code).innerHTML = ""
+            }
+        }).catch((err) => {
+            alert(err.message);
+        }).finally(() => {
+            APIOnUpdate = false;
+        })
+    }
+
     //const axios = require('axios');
     totalQuantityInputs.forEach((element)=>{
         element.addEventListener('change', (event) => {
             console.log(event.target.value);
-            axios.post('/api/orders/getpacks', {
-                quantity: event.target.value,
-                code: event.target.getAttribute("id")
-            }).then((res) => {
-                document.querySelectorAll('.packBreakdownInput.item-' + event.target.getAttribute("id")).forEach((element) => {
-                    console.log(element);
-                    element.value = 0
-                    console.log(element.value);
-                });
-                APIOnUpdate = true;
-                console.log(res);
-                res.data.packBreakdowns.forEach((breakdown) => {
-                    var input_source = document.querySelector('#pack-'+breakdown.packingID.toString()+'.packBreakdownInput' );
-                    input_source.value = breakdown.packQuantity
-                });
-               
-            }).catch((err) => {
-                alert(err.message);
-            }).finally(() => {
-                APIOnUpdate = false;
-            })
+            postData(event.target.value, event.target.getAttribute("id"));
         })
     });
 
     packBreakdownInputs.forEach((element)=>{
         element.addEventListener('change', (event) => {
             if (!APIOnUpdate) {
-                console.log(event.target.value);
-                console.log(event.target.getAttribute("related"));
 
                 var packingId = event.target.getAttribute("id");
                 var related_element_id = event.target.getAttribute("related");
                 let relatedQuantityInput = document.querySelector('.totalQuantityInput#' + related_element_id.toString());
+                console.log('#size-' + packingId.toString());
+                var newQuantity = 0;
+                document.querySelectorAll('.packBreakdownInput.item-' + related_element_id).forEach((element) => {
+                    id = element.getAttribute("id");
+                    packSize = parseInt(document.querySelector('#size-' + id.toString()).innerHTML);
+                    newQuantity += element.value * packSize;
 
+                });
+                relatedQuantityInput.value = newQuantity;
 
-
-                relatedQuantityInput.value = event.target.value * parseInt(document.querySelector('#pack-size-' + packingId.toString()).innerHTML);
+                postData(relatedQuantityInput.value, related_element_id);
             }
 
         })

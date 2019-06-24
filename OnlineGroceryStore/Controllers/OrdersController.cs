@@ -46,6 +46,7 @@ namespace OnlineGroceryStore.Controllers
             var packs = PackageSelectionHelper.GetPackBreakdown(packages, _com.quantity);
 
             var pack_sums = PackageSelectionHelper.GetBreakDownSums(packs);
+            packBreakDown.totalQuantity = pack_sums.Item1;
             packBreakDown.totalPrice = Math.Round(pack_sums.Item2, 2);
             packBreakDown.packBreakdowns = packs;
 
