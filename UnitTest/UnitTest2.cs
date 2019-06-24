@@ -91,10 +91,18 @@ namespace OnlineGroceryStore.UnitTest
             _testPackConfig.Add(
                         new PackBreakdownViewModel
                         {
-                            packQuantity = 2,
+                            packQuantity = 4,
+                            packingID = 1,
+                            inventoryPackingConfigure = _inventoryPackingConfigure.Where(x => x.packingID == 1).First(),
+                        });
+            _testPackConfig.Add(
+                        new PackBreakdownViewModel
+                        {
+                            packQuantity = 1,
                             packingID = 3,
                             inventoryPackingConfigure = _inventoryPackingConfigure.Where(x => x.packingID == 3).First(),
                         });
+
 
             var result = PackageSelectionHelper.GetPackBreakdown(_inventoryPackingConfigure, 31);
             Assert.AreEqual(PackageSelectionHelper.GetBreakDownSums(result), PackageSelectionHelper.GetBreakDownSums(_testPackConfig));

@@ -33,102 +33,103 @@ namespace OnlineGroceryStore.Helpers
                 return null;
             }
 
-
-
-            PackingBreakdownRunner(packages, orderQuantity, new List<InventoryPackingConfigure> (), new List<PackBreakdownViewModel>(), ref bestBreakDowns);
+            PackingBreakdownRunner(packages, orderQuantity, new List<PackBreakdownViewModel>(), ref bestBreakDowns);
 
             return bestBreakDowns;
         }
 
         // Algorithm recursion runner
-        private static void PackingBreakdownRunner(List<InventoryPackingConfigure> packConfig, int orderQuantity, List<InventoryPackingConfigure> usedConfig, 
+        private static void PackingBreakdownRunner(List<InventoryPackingConfigure> packConfig, int orderQuantity,
              List<PackBreakdownViewModel> breakDowns, ref List<PackBreakdownViewModel> bestBreakDowns)
         {
-            // Exit - 1: find a combination that can fulfilled all the [orderQuality]
-            if (orderQuantity <= 0 || PackVolumeOvershoot(orderQuantity,packConfig) || usedConfig.Count == packConfig.Count)
-            {
-                // check if this configure is the best one 
-                ComparePackingConfiguration(ref bestBreakDowns, breakDowns);
-                return;
-            } else if (usedConfig.Count == packConfig.Count)
-            {
-                
-            }
 
+            Dictionary<int, int> MinPackSelections = new Dictionary<int, int>();
+            MinPackSelections[0] = 0;
 
+            int lastPackPos = 0;
             // 1. Iterating through all packs
-            // 2. Choose one of packs, select the maximum quantity of packs for given condition
-            for (var i = 0; i<packConfig.Count; i++)
+
+            for (var i = 0; i < packConfig.Count; i++)
             {
-                if (usedConfig.Contains(packConfig[i])){
-                    continue;
-                }
+
                 // use the maximum amount of the pack
                 int packItemNum = packConfig[i].packSize;
                 int maxPackCount = orderQuantity / packItemNum;
 
                 // If selectable, this is added to the current selection
-                if ( maxPackCount > 0)
+                if (maxPackCount > 0)
                 {
-                    for (var packCount = 1; packCount <= maxPackCount; packCount++)
+                    // 2. Choose one of packs, iternating throught all possible pack picks
+                    for (var currentQuantity = 1; currentQuantity <= orderQuantity; currentQuantity++)
                     {
-                        if (packItemNum * packCount > orderQuantity)
+                        
+
+                        int lastQuantity = currentQuantity - packItemNum;
+                        if (lastQuantity < 0)
                         {
-                            break;
+                            continue;
                         }
-                        int remainQuantity = orderQuantity - packItemNum * packCount;
-                        var newPack = new PackBreakdownViewModel
+                        var lastMinSelect = MinPackSelections.Where(x => x.Key == lastQuantity).FirstOrDefault();
+                        var currentMinSelect = MinPackSelections.Where(x => x.Key == currentQuantity).FirstOrDefault();
+
+
+                        if (lastQuantity == 0)
                         {
-                            packQuantity = packCount,
-                            packingID = packConfig[i].packingID,
-                            inventoryPackingConfigure = packConfig[i],
+                            MinPackSelections[currentQuantity] = lastMinSelect.Value + 1;
+                        }
+                        else if (lastMinSelect.Value > 0 && ( lastMinSelect.Value + 1 < currentMinSelect.Value || currentMinSelect.Value == 0))
+                        {
+                            MinPackSelections[currentQuantity] = lastMinSelect.Value + 1;
+                        }
 
-                        };
-                        breakDowns.Add(newPack);
-                        usedConfig.Add(packConfig[i]);
-                        PackingBreakdownRunner(packConfig, remainQuantity, usedConfig, breakDowns, ref bestBreakDowns);
-                        usedConfig.Remove(packConfig[i]);
-                        breakDowns.RemoveAt(breakDowns.Count - 1);
+                        if (currentQuantity == orderQuantity && lastMinSelect.Value >= 0)
+                        {
+                            lastPackPos = i;
+                        }
                     }
-                    
+
                 }
             }
-        }
-
-        private static bool PackVolumeOvershoot(int orderQuantity, List<InventoryPackingConfigure> packConfig)
-        {
-            bool overshoot = true;
-
-            foreach (var config in packConfig)
+            int remainOrder = orderQuantity;
+            var breakDown = new PackBreakdownViewModel
             {
-                if (orderQuantity >= config.packSize)
+                packQuantity = 0,
+                packingID = packConfig[lastPackPos].packingID,
+                inventoryPackingConfigure = packConfig[lastPackPos]
+            };
+            for (var i = MinPackSelections[orderQuantity]; i > 0;)
+            {
+                if (lastPackPos < 0)
                 {
-                    return false;
+                    break;
                 }
-            }
-
-            return overshoot;
-        }
-
-        private static void ComparePackingConfiguration(ref List<PackBreakdownViewModel> bestBreakDowns,
-            List<PackBreakdownViewModel> newBreakDowns)
-        {
-            // Replace if new breakdowns covered more item
-            if (GetBreakDownSums(newBreakDowns).Item1 >= GetBreakDownSums(bestBreakDowns).Item1)
-            {
-                bestBreakDowns = newBreakDowns.ToList();
-                // Replace breakdown if cost if cheaper or current best in null
-
-            }
-            else if (GetBreakDownSums(newBreakDowns).Item1 == GetBreakDownSums(bestBreakDowns).Item1)
-            {
-                if (GetBreakDownSums(newBreakDowns).Item2 > 0 && GetBreakDownSums(newBreakDowns).Item2 < GetBreakDownSums(bestBreakDowns).Item2)
+                var currentPack = packConfig[lastPackPos];
+                var prevMinSelect = MinPackSelections.Where(x => x.Key == remainOrder - currentPack.packSize).FirstOrDefault();
+                if (remainOrder - currentPack.packSize < 0 || (prevMinSelect.Value <= 0 && remainOrder - currentPack.packSize != 0))
                 {
-                    bestBreakDowns = newBreakDowns.ToList();
+                    lastPackPos -= 1;
+                    breakDowns.Add(breakDown);
+                    breakDown = new PackBreakdownViewModel
+                    {
+                        packQuantity = 0,
+                        packingID = packConfig[lastPackPos].packingID,
+                        inventoryPackingConfigure = packConfig[lastPackPos]
+                    };
+                    continue;
                 }
-
+                breakDown.packQuantity += 1;
+                i--;
+                remainOrder -= currentPack.packSize;
             }
+            if (!breakDowns.Contains(breakDown))
+            {
+                breakDowns.Add(breakDown);
+            }
+
+            bestBreakDowns = breakDowns.ToList();
+
         }
+
 
         public static Tuple<int,double> GetBreakDownSums(ICollection<PackBreakdownViewModel> currentBreakdown)
         {
