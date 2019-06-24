@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using OnlineGroceryStore.Helpers;
@@ -8,10 +8,10 @@ using OnlineGroceryStore.ViewModels;
 namespace OnlineGroceryStore.UnitTest
 {
     /// <summary>
-    /// This test case check the 3 base inputs
+    ///  This tests the edge cases ( overshoot quantity )
     /// </summary>
     [TestClass]
-    public class UnitTest1
+    public class UnitTest2
     {
         private Inventory _inventory;
         private List<InventoryPackingConfigure> _inventoryPackingConfigure;
@@ -30,7 +30,7 @@ namespace OnlineGroceryStore.UnitTest
             _inventoryPackingConfigure = new List<InventoryPackingConfigure>();
             _inventoryPackingConfigure.Add(new InventoryPackingConfigure
             {
-                packingID = 1, 
+                packingID = 1,
                 inventory = _inventory,
                 packSize = 3,
                 packPrice = 2.99
@@ -47,11 +47,12 @@ namespace OnlineGroceryStore.UnitTest
                         new PackBreakdownViewModel
                         {
                             packQuantity = 2,
-                            packingID = 2,
-                            inventoryPackingConfigure = _inventoryPackingConfigure.Where(x => x.packingID == 2).First(),
+                            packingID = 1,
+                            inventoryPackingConfigure = _inventoryPackingConfigure.Where(x => x.packingID == 1).First(),
                         });
-           var result = PackageSelectionHelper.GetPackBreakdown(_inventoryPackingConfigure, 10);
-           Assert.AreEqual(PackageSelectionHelper.GetBreakDownSums(result), PackageSelectionHelper.GetBreakDownSums(_testPackConfig));
+            var result = PackageSelectionHelper.GetPackBreakdown(_inventoryPackingConfigure, 6);
+
+            Assert.AreEqual(PackageSelectionHelper.GetBreakDownSums(result), PackageSelectionHelper.GetBreakDownSums(_testPackConfig));
 
         }
 
@@ -81,7 +82,7 @@ namespace OnlineGroceryStore.UnitTest
             });
             _inventoryPackingConfigure.Add(new InventoryPackingConfigure
             {
-                packingID = 2,
+                packingID = 3,
                 inventory = _inventory,
                 packSize = 15,
                 packPrice = 13.95
@@ -91,17 +92,11 @@ namespace OnlineGroceryStore.UnitTest
                         new PackBreakdownViewModel
                         {
                             packQuantity = 2,
-                            packingID = 2,
-                            inventoryPackingConfigure = _inventoryPackingConfigure.Where(x => x.packingID == 2).First(),
+                            packingID = 3,
+                            inventoryPackingConfigure = _inventoryPackingConfigure.Where(x => x.packingID == 3).First(),
                         });
-            _testPackConfig.Add(
-                        new PackBreakdownViewModel
-                        {
-                            packQuantity = 2,
-                            packingID = 2,
-                            inventoryPackingConfigure = _inventoryPackingConfigure.Where(x => x.packingID == 1).First(),
-                        });
-            var result = PackageSelectionHelper.GetPackBreakdown(_inventoryPackingConfigure, 28);
+
+            var result = PackageSelectionHelper.GetPackBreakdown(_inventoryPackingConfigure, 31);
             Assert.AreEqual(PackageSelectionHelper.GetBreakDownSums(result), PackageSelectionHelper.GetBreakDownSums(_testPackConfig));
 
         }
@@ -152,7 +147,14 @@ namespace OnlineGroceryStore.UnitTest
                             packingID = 1,
                             inventoryPackingConfigure = _inventoryPackingConfigure.Where(x => x.packingID == 1).First(),
                         });
-            var result = PackageSelectionHelper.GetPackBreakdown(_inventoryPackingConfigure, 12);
+            _testPackConfig.Add(
+                        new PackBreakdownViewModel
+                        {
+                            packQuantity = 1,
+                            packingID = 2,
+                            inventoryPackingConfigure = _inventoryPackingConfigure.Where(x => x.packingID == 2).First(),
+                        });
+            var result = PackageSelectionHelper.GetPackBreakdown(_inventoryPackingConfigure, 17);
             Assert.AreEqual(PackageSelectionHelper.GetBreakDownSums(result), PackageSelectionHelper.GetBreakDownSums(_testPackConfig));
 
         }
