@@ -103,19 +103,22 @@ namespace OnlineGroceryStore.Helpers
 
         private static void ComparePackingConfiguration(ref List<PackBreakdownViewModel> bestBreakDowns,
             List<PackBreakdownViewModel> newBreakDowns)
-        {   
+        {
             // Replace if new breakdowns covered more item
-            if (GetBreakDownSums(newBreakDowns).Item1 > GetBreakDownSums(bestBreakDowns).Item1)
+            if (GetBreakDownSums(newBreakDowns).Item1 >= GetBreakDownSums(bestBreakDowns).Item1)
             {
                 bestBreakDowns = newBreakDowns.ToList();
-            }
-            // Replace breakdown if cost if cheaper or current best in null
-            else if ( GetBreakDownSums(newBreakDowns).Item2 > 0 && GetBreakDownSums(newBreakDowns).Item2 < GetBreakDownSums(bestBreakDowns).Item2 || bestBreakDowns == null)
-            {
-                bestBreakDowns = newBreakDowns.ToList();
-            } 
+                // Replace breakdown if cost if cheaper or current best in null
 
-            
+            }
+            else if (GetBreakDownSums(newBreakDowns).Item1 == GetBreakDownSums(bestBreakDowns).Item1)
+            {
+                if (GetBreakDownSums(newBreakDowns).Item2 > 0 && GetBreakDownSums(newBreakDowns).Item2 < GetBreakDownSums(bestBreakDowns).Item2)
+                {
+                    bestBreakDowns = newBreakDowns.ToList();
+                }
+
+            }
         }
 
         public static Tuple<int,double> GetBreakDownSums(ICollection<PackBreakdownViewModel> currentBreakdown)
