@@ -1,0 +1,23 @@
+﻿@page
+@model PrivacyModel
+@{
+    ViewData["Title"] = "Assumptions";
+}
+<h1>@ViewData["Title"]</h1>
+
+
+<div class="card" style="width: 45rem;">
+    <div class="card-body">
+        <ul>
+            <li>
+                Customers will have a higher preference for fulfilling all the demand for quantity than get a cheaper total cost. Therefore When multiple combinations of packing are available, the system will provide the combination <strong>with the closest total quantity first</strong> , then provide a cheaper one if the first condition is satisfied.
+            </li>
+            <li> It is assumed that the end customer will directly interact with the system. Thus, a GUI is required. </li>
+            <li>
+                When the quantity demand cannot be breaked down to a exactly combination of packing configuration, it is assumed that
+                customer will have the ultimate right to decide how to resolve the overshoot amount of supply.
+                Therefore, customer will be able to <strong>override </strong> system suggestions.
+            </li>
+        </ul>
+    </div>
+</div>

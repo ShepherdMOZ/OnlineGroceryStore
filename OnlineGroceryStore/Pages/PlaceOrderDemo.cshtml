@@ -38,7 +38,7 @@
                     @Html.DisplayFor(modelItem => item.itemName)
                 </td>
                 <td rowspan="@item.packs.Count">
-                    <input class="totalQuantityInput" id="@item.itemCode" type="number" placeholder="input quantity and hit enter" />
+                    <input class="totalQuantityInput" id="@item.itemCode" type="number" placeholder="input hit enter" />
                     <br>
                     <p style="max-width:150px;" id="overshoot-@item.itemCode"> </p>
                 </td>
@@ -58,7 +58,7 @@
                             $ @Html.DisplayFor(modelItem => pack.packPrice)
                         </td>
                         <td>
-                            x <input class="packBreakdownInput item-@pack.inventory.itemCode" id="pack-@pack.packingID" related="@pack.inventory.itemCode"  type="number" placeholder="input quantity here" /> pack(s)
+                            x <input class="packBreakdownInput item-@pack.inventory.itemCode" id="pack-@pack.packingID" related="@pack.inventory.itemCode"  type="number" placeholder="input hit enter" /> pack(s)
                         </td>
                         i++;
                     }
