@@ -17,14 +17,12 @@ namespace OnlineGroceryStore.Migrations
 
             modelBuilder.Entity("OnlineGroceryStore.Models.Inventory", b =>
                 {
-                    b.Property<string>("itemID")
+                    b.Property<int>("itemID")
                         .ValueGeneratedOnAdd();
 
                     b.Property<string>("itemCode");
 
                     b.Property<string>("itemName");
-
-                    b.Property<int>("stockLevel");
 
                     b.HasKey("itemID");
 
@@ -36,7 +34,7 @@ namespace OnlineGroceryStore.Migrations
                     b.Property<int>("packingID")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("itemID");
+                    b.Property<int>("itemID");
 
                     b.Property<double>("packPrice");
 
@@ -53,7 +51,8 @@ namespace OnlineGroceryStore.Migrations
                 {
                     b.HasOne("OnlineGroceryStore.Models.Inventory", "inventory")
                         .WithMany("packs")
-                        .HasForeignKey("itemID");
+                        .HasForeignKey("itemID")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }

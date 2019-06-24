@@ -44,7 +44,7 @@ namespace OnlineGroceryStore.Controllers
 
         // PUT: api/Inventories/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutInventory(string id, Inventory inventory)
+        public async Task<IActionResult> PutInventory(int id, Inventory inventory)
         {
             if (id != inventory.itemID)
             {
@@ -98,7 +98,7 @@ namespace OnlineGroceryStore.Controllers
             return inventory;
         }
 
-        private bool InventoryExists(string id)
+        private bool InventoryExists(int id)
         {
             return _context.Inventory.Any(e => e.itemID == id);
         }

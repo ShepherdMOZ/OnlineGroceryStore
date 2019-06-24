@@ -21,7 +21,7 @@ namespace OnlineGroceryStore.Models
 
         //Related Tables
 
-        public string itemID { get; set; }
+        public int itemID { get; set; }
         public virtual Inventory inventory { get; set; }
 
         public string orderID { get; set; }

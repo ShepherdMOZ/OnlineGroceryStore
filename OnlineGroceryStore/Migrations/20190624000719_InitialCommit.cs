@@ -2,7 +2,7 @@
 
 namespace OnlineGroceryStore.Migrations
 {
-    public partial class InitialContext : Migration
+    public partial class InitialCommit : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -10,10 +10,10 @@ namespace OnlineGroceryStore.Migrations
                 name: "Inventory",
                 columns: table => new
                 {
-                    itemID = table.Column<string>(nullable: false),
+                    itemID = table.Column<int>(nullable: false)
+                        .Annotation("Sqlite:Autoincrement", true),
                     itemName = table.Column<string>(nullable: true),
-                    itemCode = table.Column<string>(nullable: true),
-                    stockLevel = table.Column<int>(nullable: false)
+                    itemCode = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -28,7 +28,7 @@ namespace OnlineGroceryStore.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     packSize = table.Column<int>(nullable: false),
                     packPrice = table.Column<double>(nullable: false),
-                    itemID = table.Column<string>(nullable: true)
+                    itemID = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -38,7 +38,7 @@ namespace OnlineGroceryStore.Migrations
                         column: x => x.itemID,
                         principalTable: "Inventory",
                         principalColumn: "itemID",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(

@@ -9,10 +9,9 @@ namespace OnlineGroceryStore.Models
     public class Inventory
     {
         [Key]
-        public string itemID { get; set; }
+        public int itemID { get; set; }
         public string itemName { get; set; }
         public string itemCode { get; set; }
-        public int stockLevel { get; set; }
         //related class navigation
         public List<InventoryPackingConfigure> packs { get; set; }
 
@@ -25,7 +24,7 @@ namespace OnlineGroceryStore.Models
         public double packPrice { get; set; }
 
         // Related class navigation
-        public string itemID { get; set; }
+        public int itemID { get; set; }
         public Inventory inventory { get; set; }
     }
 }

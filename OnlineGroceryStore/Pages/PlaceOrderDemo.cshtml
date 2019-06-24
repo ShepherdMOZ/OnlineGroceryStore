@@ -1,0 +1,125 @@
+﻿@page
+@model OnlineGroceryStore.Pages.PlaceOrderDemoModel
+
+@{
+    ViewData["Title"] = "Place Order Page";
+}
+
+<h1>PlaceOrderDemo</h1>
+
+<p>
+    <a asp-page="Create">Create New</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.InventoryPackingConfigure[0].inventory)
+            </th>
+            <th>
+                Order Amount
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.InventoryPackingConfigure[0].packSize)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.InventoryPackingConfigure[0].packPrice)
+            </th>
+            <th>
+                Pack Breakdown
+            </th>
+            <th>
+                Total Price
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Inventories)
+        {
+            <tr>
+                <td rowspan="@item.packs.Count">
+                    @Html.DisplayFor(modelItem => item.itemName)
+                </td>
+                <td rowspan="@item.packs.Count">
+                    <input class="totalQuantityInput" id="@item.itemCode" type="number" placeholder="input quantity and hit enter" />
+
+                    <span><br> </span>
+                </td>
+                @{
+                    int i = 0;
+
+                    @foreach (var pack in item.packs)
+                    {
+                        if (i > 0)
+                        {
+                        @: </tr><tr>
+                        }
+                        <td id="pack-size-@pack.packingID" related="@pack.inventory.itemCode">
+                            @Html.DisplayFor(modelItem => pack.packSize) per pack
+                        </td>
+                        <td id="pack-price-@pack.packingID" related="@pack.inventory.itemCode">
+                            $ @Html.DisplayFor(modelItem => pack.packPrice)
+                        </td>
+                        <td>
+                            x <input class="packBreakdownInput item-@pack.inventory.itemCode" id="pack-@pack.packingID" related="@pack.inventory.itemCode"  type="number" placeholder="input quantity here" /> pack(s)
+                        </td>
+                        i++;
+                    }
+                }
+            </tr>
+        }
+    </tbody>
+</table>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+
+<script>
+    var APIOnUpdate = false;
+    let totalQuantityInputs = document.querySelectorAll('.totalQuantityInput'),
+        packBreakdownInputs = document.querySelectorAll('.packBreakdownInput')
+
+    //const axios = require('axios');
+    totalQuantityInputs.forEach((element)=>{
+        element.addEventListener('change', (event) => {
+            console.log(event.target.value);
+            axios.post('/api/orders/getpacks', {
+                quantity: event.target.value,
+                code: event.target.getAttribute("id")
+            }).then((res) => {
+                document.querySelectorAll('.packBreakdownInput.item-' + event.target.getAttribute("id")).forEach((element) => {
+                    console.log(element);
+                    element.value = 0
+                    console.log(element.value);
+                });
+                APIOnUpdate = true;
+                console.log(res);
+                res.data.packBreakdowns.forEach((breakdown) => {
+                    var input_source = document.querySelector('#pack-'+breakdown.packingID.toString()+'.packBreakdownInput' );
+                    input_source.value = breakdown.packQuantity
+                });
+               
+            }).catch((err) => {
+                alert(err.message);
+            }).finally(() => {
+                APIOnUpdate = false;
+            })
+        })
+    });
+
+    packBreakdownInputs.forEach((element)=>{
+        element.addEventListener('change', (event) => {
+            if (!APIOnUpdate) {
+                console.log(event.target.value);
+                console.log(event.target.getAttribute("related"));
+
+                var packingId = event.target.getAttribute("id");
+                var related_element_id = event.target.getAttribute("related");
+                let relatedQuantityInput = document.querySelector('.totalQuantityInput#' + related_element_id.toString());
+
+
+
+                relatedQuantityInput.value = event.target.value * parseInt(document.querySelector('#pack-size-' + packingId.toString()).innerHTML);
+            }
+
+        })
+    });
+</script>

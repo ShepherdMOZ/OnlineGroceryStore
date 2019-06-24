@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
+
 using OnlineGroceryStore.Models;
 using OnlineGroceryStore.ViewModels;
 using OnlineGroceryStore.Helpers;
@@ -31,12 +32,21 @@ namespace OnlineGroceryStore.Controllers
 
             if (item == null){
                 return NotFound();
-            } 
+            }
 
-            var packs = PackageSelectionHelper.GetPackBreakdown(item.itemID, _com.quantity, _context);
+            var packages = _context.InventoryPackingConfigure
+            .Where(x => x.itemID == item.itemID)
+            .ToList();
+
+            if (!(packages.Count > 0))
+            {
+                return null;
+            }
+
+            var packs = PackageSelectionHelper.GetPackBreakdown(packages, _com.quantity);
 
             var pack_sums = PackageSelectionHelper.GetBreakDownSums(packs);
-            packBreakDown.totalPrice = pack_sums.Item2;
+            packBreakDown.totalPrice = Math.Round(pack_sums.Item2, 2);
             packBreakDown.packBreakdowns = packs;
 
             return Ok(packBreakDown);

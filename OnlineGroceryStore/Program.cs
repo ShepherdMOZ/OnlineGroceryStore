@@ -26,7 +26,7 @@ namespace OnlineGroceryStore
                 try
                 {
                     var context = services.GetRequiredService<OnlineGroceryStoreContext>();
-                    context.Database.Migrate();
+                    context.Database.EnsureCreated();
                     InventorySeedData.Initialize(services);
                 }
                 catch (Exception ex)

@@ -23,24 +23,17 @@ namespace OnlineGroceryStore.Helpers
         /// </remarks>
 
         // Algorithm Entrypoint
-        public static ICollection<PackBreakdownViewModel> GetPackBreakdown(string itemID, int orderQuantity, OnlineGroceryStoreContext _context)
+        public static ICollection<PackBreakdownViewModel> GetPackBreakdown(List<InventoryPackingConfigure> packages, int orderQuantity)
         {
 
             List<PackBreakdownViewModel> bestBreakDowns = new List<PackBreakdownViewModel> ();
 
-            if (itemID.Length <=0 || orderQuantity <= 0)
+            if (orderQuantity <= 0)
             {
                 return null;
             }
 
-            var packages = _context.InventoryPackingConfigure
-                .Where(x => x.itemID == itemID)
-                .ToList();
 
-            if (!(packages.Count > 0))
-            {
-                return null;
-            }
 
             PackingBreakdownRunner(packages, orderQuantity, new List<InventoryPackingConfigure> (), new List<PackBreakdownViewModel>(), ref bestBreakDowns);
 
@@ -57,6 +50,9 @@ namespace OnlineGroceryStore.Helpers
                 // check if this configure is the best one 
                 ComparePackingConfiguration(ref bestBreakDowns, breakDowns);
                 return;
+            } else if (usedConfig.Count == packConfig.Count)
+            {
+                
             }
 
 
@@ -70,7 +66,6 @@ namespace OnlineGroceryStore.Helpers
                 // use the maximum amount of the pack
                 int packItemNum = packConfig[i].packSize;
                 int packCount = orderQuantity / packItemNum;
-                double packCost = packConfig[i].packPrice * packCount;
                 int remainQuantity = orderQuantity % packItemNum;
 
                 // If selectable, this is added to the current selection
@@ -82,7 +77,6 @@ namespace OnlineGroceryStore.Helpers
                         inventoryPackingConfigure = packConfig[i],
                         
                     };
-                    var used_config = packConfig[i];
                     breakDowns.Add(newPack);
                     usedConfig.Add(packConfig[i]);
                     PackingBreakdownRunner(packConfig, remainQuantity,usedConfig, breakDowns, ref bestBreakDowns);
